@@ -1,0 +1,42 @@
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: docsy-builder:latest
+    container_name: builder
+    working_dir: /work
+    volumes:
+      - .:/work:ro
+      - site:/site
+    environment:
+      DOCSY_PROJECT: "${DOCSY_PROJECT:-Purdue CYAN Lab}"
+      DOCSY_THEME: "${DOCSY_THEME:-sphinx_rtd_theme}"
+    command: ["sphinx-build", "-b", "html", "-d", "/tmp/doctrees", "docs/source", "/site"]
+    networks:
+      - docs
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: web
+    depends_on:
+      builder:
+        condition: service_completed_successfully
+    volumes:
+      - site:/site:ro
+      - ops:/var/cache/nginx
+      - ./ops/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "${DOCS_PORT:-8080}:80"
+    networks:
+      - docs
+
+volumes:
+  site:
+    name: site
+  ops:
+    name: ops
+
+networks:
+  docs:
+    driver: bridge

@@ -18,6 +18,8 @@ Welcome to Docsy!
    main/add-code
    main/authors
    main/changelog
+   main/test1
+   main/test2
 
 
 .. Indices and tables
