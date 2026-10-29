@@ -21,6 +21,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 60s
+    profiles:
+    - "dev"
 
   web:
     image: nginx:1.27-alpine
@@ -41,6 +43,28 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    profiles:
+      - "dev"
+  dev:
+    image: docsy-builder:latest
+    pull_policy: never
+    container_name: dev
+    working_dir: /work
+    profiles:
+      - "dev"
+    environment:
+      BUILD_DIR: /site
+      DOCSY_PROJECT: "${DOCSY_PROJECT:-Purdue CYAN Lab}"
+      DOCSY_THEME: "${DOCSY_THEME:-sphinx_rtd_theme}"
+    command: > 
+      sh -c "sphinx-autobuild --host 0.0.0.0 --port 8000 -d /tmp/doctrees docs/source $${BUILD_DIR}"
+    volumes:
+      - .:/work:ro
+      - site:/site
+    ports:
+      - "8000:8000"
+    networks:
+      - docs
 
 volumes:
   site:

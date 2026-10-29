@@ -5,4 +5,4 @@ This is the second test page.
 
 CNIT 48101CCI
 -------------
-This class *sucks*. 
+This class is *cool*. 

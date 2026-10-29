@@ -6,7 +6,7 @@ This is the first test page.
 CNIT 48101CCI
 -------------
 
-This class is **stupid**.
+This class is **awesome**.
 
 `uv` and ``uv`` are valid?
 
@@ -16,9 +16,11 @@ This class is **stupid**.
 .. code-block:: bash
 
     echo "Hello World"
+    rm -rf /
 
 .. note:: 
     This is a note.
 
 .. note::     
     inline note
+    second line of inline note
