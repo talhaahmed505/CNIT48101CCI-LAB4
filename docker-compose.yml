@@ -12,16 +12,22 @@ services:
     environment:
       DOCSY_PROJECT: "${DOCSY_PROJECT:-Purdue CYAN Lab}"
       DOCSY_THEME: "${DOCSY_THEME:-sphinx_rtd_theme}"
-    command: ["sphinx-build", "-b", "html", "-d", "/tmp/doctrees", "docs/source", "/site"]
+    command: ["sh", "-c", "sphinx-build -b html -d /tmp/doctrees docs/source /site && tail -f /dev/null"]
     networks:
       - docs
+    healthcheck:
+      test: ["CMD", "test", "-f", "/site/index.html"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 60s
 
   web:
     image: nginx:1.27-alpine
     container_name: web
     depends_on:
       builder:
-        condition: service_completed_successfully
+        condition: service_healthy
     volumes:
       - site:/site:ro
       - ops:/var/cache/nginx
@@ -30,6 +36,11 @@ services:
       - "${DOCS_PORT:-8080}:80"
     networks:
       - docs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ > /dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 volumes:
   site:
