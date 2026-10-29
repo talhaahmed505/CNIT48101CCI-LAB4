@@ -21,8 +21,7 @@ services:
       timeout: 3s
       retries: 5
       start_period: 60s
-    profiles:
-    - "dev"
+
 
   web:
     image: nginx:1.27-alpine
@@ -43,8 +42,7 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
-    profiles:
-      - "dev"
+
   dev:
     image: docsy-builder:latest
     pull_policy: never
@@ -65,6 +63,33 @@ services:
       - "8000:8000"
     networks:
       - docs
+  dozzle:
+    image: amir20/dozzle:v10.10.0
+    profiles: ["obs"]
+    ports:
+      - "127.0.0.1:9000:8080"   # bind to localhost only
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      web:
+        condition: service_started
+    networks: [docs]
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.60.5
+    profiles: ["obs"]
+    privileged: true            # required by cAdvisor for full container metrics
+    devices:
+      - /dev/kmsg
+    ports:
+      - "127.0.0.1:9100:8080"   # bind to localhost only
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks: [docs]
 
 volumes:
   site:
