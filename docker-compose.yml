@@ -21,6 +21,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 60s
+    profiles:
+      - "prod"
 
 
   web:
@@ -38,10 +40,12 @@ services:
     networks:
       - docs
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/ > /dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ > /dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 3
+    profiles:
+      - "prod"
 
   dev:
     image: docsy-builder:latest
@@ -64,6 +68,7 @@ services:
     networks:
       - docs
   dozzle:
+    container_name: dozzle
     image: amir20/dozzle:v10.10.0
     profiles: ["obs"]
     ports:
@@ -72,10 +77,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       web:
-        condition: service_started
+        condition: service_healthy
     networks: [docs]
 
   cadvisor:
+    container_name: cadvisor
     image: ghcr.io/google/cadvisor:0.60.5
     profiles: ["obs"]
     privileged: true            # required by cAdvisor for full container metrics
